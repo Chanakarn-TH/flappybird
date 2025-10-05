@@ -18,8 +18,8 @@ body {
 
   #game {
     border-color: aquamarine;
-    width: 288;
-    height: 512;
+    width: 288px;
+    height: 512px;
     margin: 0 auto;
     background: url(flappybirdbg.png) no-repeat center;
     background-size: cover;
