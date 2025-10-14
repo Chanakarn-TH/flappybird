@@ -28,14 +28,41 @@ window.onload = function () {
 
   //draw flappy bird
   context.fillStyle = "green";
-  // Replace these with sensible numbers and experiment! :) e.g. context.fillRect(100, 100, 30, 50);
-  context.fillRect(50, 50, 18, 25);
+  context.fillRect(birdX, birdY, birdWidth, birdHeight);
 
   //load images
   birdImg = new Image();
   birdImg.src = "./flappybird.png";
   birdImg.onload = function () {
-    // Feel free to first experiment with some numbers: context.drawImage(birdImg, 100, 100, 30, 50) before using variables
-    context.drawImage(birdImg, 34, 24, 8, 2);
+    context.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+  };
+
+  topPipeImg = new Image();
+  topPipeImg.src = "./toppipe.png";
+  topPipeImg.onload = function () {
+    context.drawImage(topPipeImg, 0, 0, pipeWidth, pipeHeight);
+    context.drawImage(topPipeImg, 80, 0, pipeWidth, pipeHeight / 2);
+    context.drawImage(topPipeImg, 160, 0, pipeWidth, pipeHeight / 3);
+    context.drawImage(topPipeImg, 240, 0, pipeWidth, pipeHeight / 4);
+  };
+
+  bottomPipeImg = new Image();
+  bottomPipeImg.src = "./bottompipe.png";
+  bottomPipeImg.onload = function () {
+    context.drawImage(bottomPipeImg, 0, 565, pipeWidth, pipeHeight / 4);
+    context.drawImage(bottomPipeImg, 80, 425, pipeWidth, pipeHeight / 3);
+    context.drawImage(bottomPipeImg, 160, 320, pipeWidth, pipeHeight / 2);
+    context.drawImage(bottomPipeImg, 240, 215, pipeWidth, pipeHeight);
+  };
+
+  const orderFood = (restaurantName, foodAmount, foodName) => {
+    console.log(
+      "You are ordering " +
+        foodAmount +
+        " of " +
+        foodName +
+        " from " +
+        restaurantName
+    );
   };
 };
