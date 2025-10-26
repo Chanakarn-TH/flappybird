@@ -20,6 +20,7 @@ let pipeY = 0;
 let topPipeImg;
 let bottomPipeImg;
 
+
 window.onload = function () {
   board = document.getElementById("board");
   board.height = boardHeight;
@@ -55,14 +56,81 @@ window.onload = function () {
     context.drawImage(bottomPipeImg, 240, 215, pipeWidth, pipeHeight);
   };
 
-  const orderFood = (restaurantName, foodAmount, foodName) => {
-    console.log(
-      "You are ordering " +
-        foodAmount +
-        " of " +
-        foodName +
-        " from " +
-        restaurantName
-    );
+   requestAnimationFrame(update);
+
+    
   };
-};
+
+
+// Function to draw the bird at its current position
+function drawBird() {
+  context.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+}
+
+// Main game loop
+function update() {
+  console.log("Game updating...");
+
+   // Clears the entire canvas
+  context.clearRect(0, 0, board.width, board.height);
+
+   // Updates the bird's position
+  birdY = birdY + 1; // Gravity effect: bird falls down each frame
+
+   // Draws the bird at its new position
+  drawBird();
+
+  requestAnimationFrame(update);
+
+  // Function to handle the jump
+function jump() {
+    console.log("Jumping!");
+    
+    // Apply an upward velocity, overwriting any previous velocity
+    birdVelocity = -birdJumpStrength;
+}
+
+// Event listener for the spacebar
+window.addEventListener('keydown', (event) => {
+    // Check if the pressed key is the spacebar
+    if (event.code === 'Space') {
+       // This line is the key fix: it stops the browser from its default action
+        event.preventDefault();
+        console.log("Spacebar was pressed!");
+        jump();
+       
+    }
+});
+
+    // Apply gravity to the bird's velocity
+    birdVelocity += gravity;
+
+    // Update the bird's vertical position
+    birdY += birdVelocity;
+
+
+    // Prevent the bird from going off the bottom of the screen
+    if (birdY > canvas.height - birdSize) {
+        birdY = canvas.height - birdSize;
+        birdVelocity = 0; // Stop vertical movement
+    }
+    
+    // Prevent the bird from going off the top
+    if (birdY < birdSize) {
+        birdY = birdSize;
+        birdVelocity = 0;
+    }
+
+    // Draw the bird at its new position
+    drawBird();
+    
+    // Update the status display with the current bird position
+    statusDisplay.textContent = `Bird Y: ${Math.round(birdY)}`;
+
+   
+// Start the game loop
+update();
+
+
+
+}
