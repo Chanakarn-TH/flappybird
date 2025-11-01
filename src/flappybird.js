@@ -1,3 +1,4 @@
+
 //board
 let board;
 let boardWidth = 360;
@@ -7,130 +8,148 @@ let context;
 //bird
 let birdWidth = 34; //width/height ratio = 408/228 = 17/12
 let birdHeight = 24;
-let birdX = boardWidth / 8;
-let birdY = boardHeight / 2;
+let birdX = boardWidth/8;
+let birdY = boardHeight/2;
 let birdImg;
 
-//pipes
+//pipe
 let pipeWidth = 64; //width/height ratio = 384/3072 = 1/8
 let pipeHeight = 512;
 let pipeX = boardWidth;
 let pipeY = 0;
 
 let topPipeImg;
-let bottomPipeImg;
+
+let velocityX = -2; //pipes moving left speed
 
 
-window.onload = function () {
-  board = document.getElementById("board");
-  board.height = boardHeight;
-  board.width = boardWidth;
-  context = board.getContext("2d"); //used for drawing on the board
+let velocityY = 0; //bird jump speed
+let gravity = 0.4;
 
-  //draw flappy bird
-  context.fillStyle = "green";
-  context.fillRect(birdX, birdY, birdWidth, birdHeight);
+let gameOver = false;
 
-  //load images
-  birdImg = new Image();
-  birdImg.src = "./flappybird.png";
-  birdImg.onload = function () {
-    context.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
-  };
+let GAME_STATE;
 
-  topPipeImg = new Image();
-  topPipeImg.src = "./toppipe.png";
-  topPipeImg.onload = function () {
-    context.drawImage(topPipeImg, 0, 0, pipeWidth, pipeHeight);
-    context.drawImage(topPipeImg, 80, 0, pipeWidth, pipeHeight / 2);
-    context.drawImage(topPipeImg, 160, 0, pipeWidth, pipeHeight / 3);
-    context.drawImage(topPipeImg, 240, 0, pipeWidth, pipeHeight / 4);
-  };
+window.onload = function() 
+{
+    board = document.getElementById("board");
+    board.height = boardHeight;
+    board.width = boardWidth;
+    context = board.getContext("2d"); //used for drawing on the board
 
-  bottomPipeImg = new Image();
-  bottomPipeImg.src = "./bottompipe.png";
-  bottomPipeImg.onload = function () {
-    context.drawImage(bottomPipeImg, 0, 565, pipeWidth, pipeHeight / 4);
-    context.drawImage(bottomPipeImg, 80, 425, pipeWidth, pipeHeight / 3);
-    context.drawImage(bottomPipeImg, 160, 320, pipeWidth, pipeHeight / 2);
-    context.drawImage(bottomPipeImg, 240, 215, pipeWidth, pipeHeight);
-  };
+    //load images
+    birdImg = new Image();
+    birdImg.src = "./flappybird.png";
+    birdImg.onload = function() 
+    {
+        context.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+    }
 
-   requestAnimationFrame(update);
+    topPipeImg = new Image();
+    topPipeImg.src = "./toppipe.png";
+    topPipeImg.onload = function() 
+    {
+        context.drawImage(topPipeImg, pipeX - pipeWidth, pipeY, pipeWidth, pipeHeight);
+    }
 
-    
-  };
+    requestAnimationFrame(update);
 
-
-// Function to draw the bird at its current position
-function drawBird() {
-  context.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+    document.addEventListener("keydown", moveBird);
+    window.addEventListener('click', gameState);
+    document.addEventListener('keydown', (e) => {
+    console.log('Key pressed:', e.code);
+    });
+    board.addEventListener('click', () => {
+      console.log('Board clicked');
+      if (GAME_STATE === 'GAME_OVER') restartGame();
+    });
 }
 
-// Main game loop
-function update() {
-  console.log("Game updating...");
 
-   // Clears the entire canvas
-  context.clearRect(0, 0, board.width, board.height);
+function update() 
+{
+    requestAnimationFrame(update);
+    context.clearRect(0, 0, board.width, board.height);  
 
-   // Updates the bird's position
-  birdY = birdY + 1; // Gravity effect: bird falls down each frame
 
-   // Draws the bird at its new position
-  drawBird();
+    //bird
+    velocityY += gravity; //0 -> 0.4 -> 0.8 -> 1.2 ...
+    birdY += velocityY;
+    //console.log("Bird Y Position: " + birdY); For debugging
 
-  requestAnimationFrame(update);
 
-  // Function to handle the jump
-function jump() {
-    console.log("Jumping!");
-    
-    // Apply an upward velocity, overwriting any previous velocity
-    birdVelocity = -birdJumpStrength;
-}
-
-// Event listener for the spacebar
-window.addEventListener('keydown', (event) => {
-    // Check if the pressed key is the spacebar
-    if (event.code === 'Space') {
-       // This line is the key fix: it stops the browser from its default action
-        event.preventDefault();
-        console.log("Spacebar was pressed!");
-        jump();
-       
+    pipeX += velocityX; //move pipe to left
+    drawPipe(); 
+    drawBird(); 
+   
+    // Clamp to ceiling
+    if (birdY < 0) {
+      birdY = 0;
     }
-});
-
-    // Apply gravity to the bird's velocity
-    birdVelocity += gravity;
-
-    // Update the bird's vertical position
-    birdY += birdVelocity;
-
-
-    // Prevent the bird from going off the bottom of the screen
-    if (birdY > canvas.height - birdSize) {
-        birdY = canvas.height - birdSize;
-        birdVelocity = 0; // Stop vertical movement
+     // Clamp to floor
+    if (birdY > board.height - birdHeight) {
+      birdY = board.height - birdHeight;
+      GAME_STATE = 'GAME_OVER';
+    }  
+  
+    if (GAME_STATE === 'GAME_OVER') {
+    context.fillStyle = 'red';
+    context.font = '24px sans-serif';
+    context.fillText('GAME OVER', 100, 100);
     }
-    
-    // Prevent the bird from going off the top
-    if (birdY < birdSize) {
-        birdY = birdSize;
-        birdVelocity = 0;
-    }
-
-    // Draw the bird at its new position
-    drawBird();
-    
-    // Update the status display with the current bird position
-    statusDisplay.textContent = `Bird Y: ${Math.round(birdY)}`;
 
    
-// Start the game loop
-update();
+    draw();
+    requestAnimationFrame(update); 
+}
+
+// Function to draw the bird at its current position
+function drawBird() 
+{
+    context.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+  
+}       
+
+function drawPipe()
+{
+    context.drawImage(topPipeImg, pipeX, pipeY, pipeWidth, pipeHeight);
+}
 
 
+
+function moveBird(e) 
+{
+    if (e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX") 
+    {
+        //jump
+        velocityY = -6;
+    }
 
 }
+
+
+
+function gameState(e)
+{
+  if (GAME_STATE === 'RUNNING') flap();
+  else restartGame();
+}
+function restartGame() 
+{
+  console.log('Restarting game...');
+  GAME_STATE = 'RUNNING';
+  if (e.code == "keyR")
+    {
+        birdY = board.height / 2;
+        velocityY = 0;
+    }
+  
+}
+
+
+function flap() {
+  console.log('Flap!');
+  if (GAME_STATE === 'RUNNING') birdVelocity = -8;
+ 
+}   
+
